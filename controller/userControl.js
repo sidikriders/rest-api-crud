@@ -133,18 +133,29 @@ function signUp(req, res, next) {
   let newUser = form.username;
   let newEmail = form.email;
   let newPass = bcrypt.hashSync(form.password, salt);
-
-  db.User.create({
-    name: newName,
-    username: newUser,
-    email: newEmail,
-    password: newPass,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }).then( () => {
-    res.send('create berhasil')
-  }).catch( err => console.log(err))
-  // res.send(`${newName} ${newUserame} ${newName} ${newName} `)
+  db.User.findOne({
+    where: sequelize.or({
+      username: newUser
+    }, {
+      email: newEmail
+    })
+  }).then( data => {
+    if (data) {
+      res.send('email atau usernam sudah terpakai')
+    } else {
+      db.User.create({
+        name: newName,
+        username: newUser,
+        email: newEmail,
+        password: newPass,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).then( () => {
+        res.send('create berhasil')
+      }).catch( err => console.log(err))
+      // res.send(`${newName} ${newUserame} ${newName} ${newName} `)
+    }
+  })
 }
 
 function signIn(req, res, next) {
