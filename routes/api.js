@@ -1,17 +1,23 @@
 var express = require('express');
 var router = express.Router();
-var db = require('../models/')
-var fung = require('../controller/userControl')
+var db = require('../models/');
+var fung = require('../controller/userControl');
 
 /* GET home page. */
-router.get('/', fung.showAll);
+router.get('/users', fung.showAll);
 
-router.post('/', fung.create)
+router.post('/users', fung.create)
 
-router.get('/:id', fung.find)
+router.get('/users/:id', fung.find)
 
-router.delete('/:id', fung.hapus)
+router.delete('/users/:id', fung.hapus)
 
-router.put('/:id', fung.apdet)
+router.put('/users/:id', fung.apdet)
+
+router.post('/signup', fung.signUp)
+
+router.post('/signin', fung.signIn)
+
+
 
 module.exports = router;

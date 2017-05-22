@@ -1,4 +1,9 @@
 'use strict';
+var bcrypt = require('bcrypt');
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
+var salt = bcrypt.genSaltSync(saltRounds);
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
@@ -16,30 +21,48 @@ module.exports = {
       name: 'Sidik',
       username: 'sidiksigap',
       email: 'sidik@gmail.com',
+      password: bcrypt.hashSync('sidiksigap', salt),
+      role: 'user',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }, {
+      name: 'Admin',
+      username: 'admin',
+      email: 'admin@gmail.com',
+      password: bcrypt.hashSync('admin', salt),
+      role: 'admin',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       name: 'Silhoutte',
       username: 'sisilhuthut',
       email: 'sisil@gmail.com',
+      password: bcrypt.hashSync('gelap', salt),
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       name: 'Baram',
       username: 'baramemanhi',
       email: 'baramhae@gmail.com',
+      role: 'user'
+      password: bcrypt.hashSync('cukajawa', salt),
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       name: 'Gurarara',
       username: 'shishishi',
       email: 'kukukuku@gmail.com',
+      password: bcrypt.hashSync('gulaaren', salt),
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       name: 'Mangkan',
       username: 'mangkanaaa',
       email: 'makannn@gmail.com',
+      password: bcrypt.hashSync('garamdapur', salt),
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }], {})
