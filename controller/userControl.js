@@ -5,6 +5,7 @@ const myPlaintextPassword = 's0/\/\P4$$w0rD';
 const someOtherPlaintextPassword = 'not_bacon';
 var salt = bcrypt.genSaltSync(saltRounds);
 var jwt = require('jsonwebtoken');
+var sequelize = require('sequelize')
 
 
 function showAll(req, res, next) {
@@ -28,8 +29,23 @@ function create(req, res, next) {
   if (token) {
     let decode = jwt.verify(token, 'BIMILIYA');
     if (decode.role === 'admin') {
-      db.User.create(req.body).then(() => {
-        res.send('berhasil buat')
+      let newUser = req.body.username;
+      let newEmail = req.body.email;
+      //validasi manual
+      db.User.findOne({
+        where: sequelize.or({
+          username: newUser
+        }, {
+          email: newEmail
+        })
+      }).then( dataAda => {
+        if (dataAda) {
+          res.send('username atau email sudah terpakai')
+        } else {
+          db.User.create(req.body).then(() => {
+            res.send('berhasil buat')
+          })
+        }
       })
     } else {
       res.send('admin only ...')
