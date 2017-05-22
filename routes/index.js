@@ -6,7 +6,7 @@ var db = require('../models')
 router.get('/', function(req, res, next) {
   db.User.findAll().then( data => {
     // res.send({ title: 'Express' });
-    res.send(data)
+    res.redirect('/api/signup')
   })
 
 });
