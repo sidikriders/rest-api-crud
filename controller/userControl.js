@@ -9,62 +9,80 @@ var jwt = require('jsonwebtoken');
 
 function showAll(req, res, next) {
   let token = req.headers.token;
-  let decode = jwt.verify(token, 'BIMILIYA')
-  if (decode.role === 'admin') {
-    db.User.findAll().then(data => {
-      res.send(data);
-    })
+  if (token) {
+    let decode = jwt.verify(token, 'BIMILIYA')
+    if (decode.role === 'admin') {
+      db.User.findAll().then(data => {
+        res.send(data);
+      })
+    } else {
+      res.send('sori coy, admin only...')
+    }
   } else {
-    res.send('sori coy, admin only...')
+    res.send('login dlu donk...')
   }
-
 }
 
 function create(req, res, next) {
   let token = req.headers.token;
-  let decode = jwt.verify(token, 'BIMILIYA');
-  if (decode.role === 'admin') {
-    db.User.create(req.body).then(() => {
-      res.send('berhasil buat')
-    })
+  if (token) {
+    let decode = jwt.verify(token, 'BIMILIYA');
+    if (decode.role === 'admin') {
+      db.User.create(req.body).then(() => {
+        res.send('berhasil buat')
+      })
+    } else {
+      res.send('admin only ...')
+    }
   } else {
-    res.send('admin only ...')
+    res.send('login dlu dnk ...')
   }
+
 }
 
 function find(req, res, next) {
   let token = req.headers.token;
-  let decode = jwt.verify(token, 'BIMILIYA');
-  if (decode.role === 'admin' || decode.role === 'user') {
-    let aidi = req.params.id
-    db.User.findOne({
-      where: {
-        id: aidi
-      }
-    }).then(data => {
-      if (data) res.send(data)
-      else res.send('not found')
-    })
+  if (token) {
+    let decode = jwt.verify(token, 'BIMILIYA');
+    if (decode.role === 'admin' || decode.role === 'user') {
+      let aidi = req.params.id
+      db.User.findOne({
+        where: {
+          id: aidi
+        }
+      }).then(data => {
+        if (data) res.send(data)
+        else res.send('not found')
+      })
+    } else {
+      res.send('akun belum ter atuhtentikasi')
+    }
+  } else {
+    res.send('login dlu dnk ...')
   }
+
 
 }
 
 function hapus(req, res, next) {
   let aidi = req.params.id
   let token = req.headers.token;
-  let decode = jwt.verify(token, 'BIMILIYA');
-  if (decode.role === 'admin') {
-    db.User.destroy({
-      where: {
-        id: aidi
-      }
-    }).then( () => {
-      res.send('Berhasil di hapus!!')
-    })
+  if (token) {
+    let decode = jwt.verify(token, 'BIMILIYA');
+    if (decode.role === 'admin') {
+      db.User.destroy({
+        where: {
+          id: aidi
+        }
+      }).then( () => {
+        res.send('Berhasil di hapus!!')
+      })
+    } else {
+      res.send('admin only (*´∀`*)')
+    }
   } else {
-    res.send('admin only (*´∀`*)')
+    res.send('login dlu')
   }
-
 }
 
 function apdet(req, res, next) {
@@ -73,19 +91,23 @@ function apdet(req, res, next) {
   let newUser = req.body.username
   let newEmail = req.body.email
   let token = req.headers.token;
-  let decode = jwt.verify(token, 'BIMILIYA');
-  if (decode !== undefined) {
-    db.User.update({
-      name: newName,
-      username: newUser,
-      email: newEmail
-    }, { where: {
-      id: aidi
-    }}).then(() => {
-      res.send('terupdate!!')
-    })
+  if (token) {
+    let decode = jwt.verify(token, 'BIMILIYA');
+    if (decode !== undefined) {
+      db.User.update({
+        name: newName,
+        username: newUser,
+        email: newEmail
+      }, { where: {
+        id: aidi
+      }}).then(() => {
+        res.send('terupdate!!')
+      })
+    } else {
+      res.send('(ﾉ^ヮ^)ﾉ*:・ﾟ✧ admin or authenticated user aja, ')
+    }
   } else {
-    res.send('(ﾉ^ヮ^)ﾉ*:・ﾟ✧ admin or authenticated user aja, ')
+    res.send('login dlu dnkk')
   }
 }
 
@@ -123,7 +145,7 @@ function signIn(req, res, next) {
         let token = jwt.sign({username: data.username, role: data.role}, 'BIMILIYA')
         res.send('berhasil, anda sudah dapat jsonwebtoken: ' + token)
       } else {
-        res.send('hmm??')
+        res.send('hmm?? password nya salah tuch')
       }
     } else {
       res.send('username salah')
