@@ -7,97 +7,105 @@ var salt = bcrypt.genSaltSync(saltRounds);
 var jwt = require('jsonwebtoken');
 var sequelize = require('sequelize')
 
+function cekAdmin(req, res, next) {
+  let token = req.headers.token
 
-function showAll(req, res, next) {
-  let token = req.headers.token;
   if (token) {
     let decode = jwt.verify(token, 'BIMILIYA')
-    if (decode.role === 'admin') {
-      db.User.findAll().then(data => {
-        res.send(data);
-      })
+    if (decode.role == 'admin') {
+      next()
+    } else if (decode.role == 'user'){
+      res.send('admin only, sorry coy ..')
     } else {
-      res.send('sori coy, admin only...')
+      res.send('token nya error')
     }
   } else {
-    res.send('login dlu donk...')
+    res.send('login dlu dnk')
   }
+}
+
+function cekUser(req, res, next) {
+  let token = req.headers.token
+
+  if (token) {
+    let decode = jwt.verify(token, 'BIMILIYA')
+    if (decode.role == 'admin') {
+      next()
+    } else if (decode.role == 'user'){
+      next()
+    } else {
+      res.send('token nya error')
+    }
+  } else {
+    res.send('login dlu dnk')
+  }
+}
+
+function showAll(req, res, next) {
+  db.User.findAll().then(data => {
+    res.send(data);
+  })
 }
 
 function create(req, res, next) {
   let token = req.headers.token;
-  if (token) {
-    let decode = jwt.verify(token, 'BIMILIYA');
-    if (decode.role === 'admin') {
-      let newUser = req.body.username;
-      let newEmail = req.body.email;
-      //validasi manual
-      db.User.findOne({
-        where: sequelize.or({
-          username: newUser
-        }, {
-          email: newEmail
-        })
-      }).then( dataAda => {
-        if (dataAda) {
-          res.send('username atau email sudah terpakai')
-        } else {
-          db.User.create(req.body).then(() => {
-            res.send('berhasil buat')
-          })
-        }
+  let decode = jwt.verify(token, 'BIMILIYA');
+  if (decode.role === 'admin') {
+    let newUser = req.body.username;
+    let newEmail = req.body.email;
+    //validasi manual
+    db.User.findOne({
+      where: sequelize.or({
+        username: newUser
+      }, {
+        email: newEmail
       })
-    } else {
-      res.send('admin only ...')
-    }
+    }).then( dataAda => {
+      if (dataAda) {
+        res.send('username atau email sudah terpakai')
+      } else {
+        db.User.create(req.body).then(() => {
+          res.send('berhasil buat')
+        })
+      }
+    })
   } else {
-    res.send('login dlu dnk ...')
+    res.send('admin only ...')
   }
-
 }
 
 function find(req, res, next) {
   let token = req.headers.token;
-  if (token) {
-    let decode = jwt.verify(token, 'BIMILIYA');
-    if (decode.role === 'admin' || decode.role === 'user') {
-      let aidi = req.params.id
-      db.User.findOne({
-        where: {
-          id: aidi
-        }
-      }).then(data => {
-        if (data) res.send(data)
-        else res.send('not found')
-      })
-    } else {
-      res.send('akun belum ter atuhtentikasi')
-    }
+  let decode = jwt.verify(token, 'BIMILIYA');
+  if (decode.role === 'admin' || decode.role === 'user') {
+    let aidi = req.params.id
+    db.User.findOne({
+      where: {
+        id: aidi
+      }
+    }).then(data => {
+      if (data) res.send(data)
+      else res.send('not found')
+    })
   } else {
-    res.send('login dlu dnk ...')
+    res.send('akun belum ter atuhtentikasi')
   }
-
-
 }
 
 function hapus(req, res, next) {
   let aidi = req.params.id
   let token = req.headers.token;
-  if (token) {
-    let decode = jwt.verify(token, 'BIMILIYA');
-    if (decode.role === 'admin') {
-      db.User.destroy({
-        where: {
-          id: aidi
-        }
-      }).then( () => {
-        res.send('Berhasil di hapus!!')
-      })
-    } else {
-      res.send('admin only (*´∀`*)')
-    }
+  let decode = jwt.verify(token, 'BIMILIYA');
+  if (decode.role === 'admin') {
+    db.User.destroy({
+      where: {
+        id: aidi
+      }
+    }).then( () => {
+      res.send('Berhasil di hapus!!')
+    })
   } else {
-    res.send('login dlu')
+    res.send('admin only (*´∀`*)')
   }
 }
 
@@ -107,23 +115,19 @@ function apdet(req, res, next) {
   let newUser = req.body.username
   let newEmail = req.body.email
   let token = req.headers.token;
-  if (token) {
-    let decode = jwt.verify(token, 'BIMILIYA');
-    if (decode !== undefined) {
-      db.User.update({
-        name: newName,
-        username: newUser,
-        email: newEmail
-      }, { where: {
-        id: aidi
-      }}).then(() => {
-        res.send('terupdate!!')
-      })
-    } else {
-      res.send('(ﾉ^ヮ^)ﾉ*:・ﾟ✧ admin or authenticated user aja, ')
-    }
+  let decode = jwt.verify(token, 'BIMILIYA');
+  if (decode !== undefined) {
+    db.User.update({
+      name: newName,
+      username: newUser,
+      email: newEmail
+    }, { where: {
+      id: aidi
+    }}).then(() => {
+      res.send('terupdate!!')
+    })
   } else {
-    res.send('login dlu dnkk')
+    res.send('(ﾉ^ヮ^)ﾉ*:・ﾟ✧ admin or authenticated user aja, ')
   }
 }
 
@@ -187,5 +191,7 @@ module.exports={
   hapus,
   apdet,
   signUp,
-  signIn
+  signIn,
+  cekUser,
+  cekAdmin
 }
