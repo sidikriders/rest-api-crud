@@ -18,6 +18,46 @@ router.post('/signup', fung.signUp)
 
 router.post('/signin', fung.signIn)
 
+router.get('/memo/all', function(req, res, next) {
+  db.Memo.findAll()
+  .then(data => {
+    res.send(data)
+  })
+})
 
+router.get('/memo/:id', function(req, res, next) {
+  db.Memo.find({
+    where: {
+      id:req.params.id
+    }
+  })
+  .then(data => {
+    res.send(data)
+  })
+})
+
+router.put('/memo/:id', function(req, res, next) {
+  db.Memo.update({
+    title: req.body.newTittle,
+    text: req.body.newText,
+    updatedAt: new Date()
+  }, {
+    where: {
+      id: req.params.id
+    }
+  }).then(
+    res.send('memo terupdate')
+  )
+})
+
+router.delete('/memo/:id', function(req,res,next) {
+  db.Memo.destroy({
+    where: {
+      id: req.params.id
+    }
+  }).then(
+    res.send('terhapus!!')
+  )
+})
 
 module.exports = router;
